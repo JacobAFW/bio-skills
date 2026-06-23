@@ -2,8 +2,6 @@
 
 *Agent skills for the bioinformatics chores that have no tool and need judgement.*
 
-> Working title — rename before you push.
-
 Two installable skills for Claude Code (and any skill-capable agent). They don't
 reimplement FastQC, MultiQC, samtools, or bcftools. They do the part those tools
 leave to a human: reading a wall of output and **deciding what to do next**.
