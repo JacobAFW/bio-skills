@@ -1,0 +1,10 @@
+[2026-06-19T02:14:08] Running HaplotypeCaller on sample HG_0473 (array task 47)
+Using GATK jar /opt/gatk/gatk-package-4.5.0.0-local.jar
+INFO  ProgressMeter - Starting traversal
+INFO  ProgressMeter -        chr1:1000000              0.5     120000    240000.0
+INFO  ProgressMeter -        chr1:9120000              1.5     980000    653333.0
+slurmstepd: error: Detected 1 oom_kill event in StepId=7781234.47.
+Some of the step tasks have been OOM Killed.
+slurmstepd: error: Detected 1 oom-kill event(s) in StepId=7781234.batch cgroup.
+srun: error: node-c14: task 0: Out Of Memory
+[2026-06-19T03:41:55] Task 47 exited with code 137

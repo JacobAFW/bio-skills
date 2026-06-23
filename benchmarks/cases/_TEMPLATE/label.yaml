@@ -1,0 +1,18 @@
+# Ground truth for <case-id>. Kept separate from evidence/ so it can be withheld
+# from the agent at run time and used only for scoring.
+
+case_id: <case-id>
+
+# One of: resource-kill | missing-index | reference-mismatch | version-drift |
+#         format-violation | environment | novel
+category: <category>
+
+# The single correct root cause, in one line.
+root_cause: <one line>
+
+# What actually fixed it (or would have). Used to grade fix actionability.
+correct_fix: <the command / config change that resolves it>
+
+# Optional: notes for the grader (ambiguity, multiple valid fixes, etc.)
+notes: >-
+  <free text>

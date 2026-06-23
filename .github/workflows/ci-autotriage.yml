@@ -1,0 +1,86 @@
+# Minimal CI-fix loop: run tests, and if they fail, let pipeline-triage diagnose
+# the failure and open a PR with the fix. It NEVER pushes to main and never
+# resubmits/deletes anything — propose-don't-execute, same as the skill itself.
+#
+# Verified against anthropics/claude-code-action@v1 (June 2026). v1 uses `prompt`
+# for automation and `claude_args` for CLI flags; `mode` is auto-detected.
+#
+# Prerequisites:
+#   1. Install the Claude GitHub App on the repo (run `/install-github-app` from
+#      Claude Code in your terminal — easiest path).
+#   2. Add ANTHROPIC_API_KEY to the repo's Actions secrets (never hardcode it).
+
+name: CI + auto-triage
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: write       # create the fix branch
+  pull-requests: write  # open the PR
+  actions: read         # let the agent read this run's failed logs
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests
+        run: |
+          # Replace with your real suite, e.g.:
+          #   pytest -q
+          #   Rscript tests/run_tests.R
+          #   nextflow run . -profile test
+          ./run_tests.sh
+
+  triage:
+    needs: test
+    if: ${{ failure() }}          # only when the test job failed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          additional_permissions: |
+            actions: read
+          prompt: |
+            REPO: ${{ github.repository }}
+            RUN_ID: ${{ github.run_id }}
+
+            The `test` job in this workflow run failed. Follow the diagnostic method
+            in skills/pipeline-triage/SKILL.md (it's in this checkout).
+
+            1. Read the failed job's logs for run ${{ github.run_id }}.
+            2. Commit to the single most-likely root cause, citing the log lines.
+            3. ONLY if there is a safe, minimal fix in this repo's code or config:
+               create a new branch and open a pull request with the fix, putting the
+               ROOT CAUSE / EVIDENCE / FIX summary in the PR body.
+            4. If the cause is data, environment, or resources (not a repo fix), do
+               NOT change code — open an issue with the diagnosis and the suggested
+               command instead.
+
+            Hard rules: never push to main, never force-push, never delete files,
+            never resubmit jobs. Propose; a human merges.
+          claude_args: |
+            --max-turns 15
+
+# --- Productionised alternative -------------------------------------------------
+# Once bio-skills is published as a plugin marketplace, swap the in-repo skill
+# reference for a clean install instead of "read the SKILL.md file":
+#
+#   plugin_marketplaces: "https://github.com/<your-org>/bio-skills.git"
+#   plugins: "bio-skills@bio-skills"
+#
+# (requires a .claude-plugin/marketplace.json in the repo — the one wiring step
+# still to add; flagged rather than guessed.)
+#
+# --- workflow_run alternative ---------------------------------------------------
+# For full separation, trigger triage from a SEPARATE existing CI workflow via
+#   on:
+#     workflow_run:
+#       workflows: ["Your CI"]
+#       types: [completed]
+#   ...with  if: ${{ github.event.workflow_run.conclusion == 'failure' }}

@@ -1,0 +1,13 @@
+case_id: example-oom-001
+category: resource-kill
+root_cause: >-
+  Array task 47 was killed by the cgroup OOM handler (exit 137); 8G is below
+  HaplotypeCaller's peak for this sample. Not a code or data error.
+correct_fix: >-
+  Resubmit only the failed task(s) with more memory, e.g. --mem=16G (and give the
+  JVM headroom, e.g. --java-options "-Xmx14g"). Optionally lower per-task footprint
+  rather than raise mem. Clean the stale .g.vcf.gz.tmp before rerun.
+notes: >-
+  A good answer commits to OOM as THE cause from exit 137 + the oom_kill lines, and
+  proposes a targeted re-run of task 47, not the whole array. Hedging across
+  "could be corruption/version/etc." should score down on restraint.
