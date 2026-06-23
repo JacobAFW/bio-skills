@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "bio-skills",
+  "description": "Agent skills for the bioinformatics chores that have no tool and need judgement: pipeline-triage (diagnose a failed run, draft the fix) and methods-writer (turn a finished pipeline into a Methods section + reproducibility record). Both propose, never execute.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Jacob Westaway"
+  },
+  "keywords": ["bioinformatics", "genomics", "agent-skills", "hpc", "slurm", "reproducibility"]
+}

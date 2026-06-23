@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "bio-skills",
+  "description": "Bioinformatics agent skills that wrap mature tools and add the judgement layer.",
+  "owner": {
+    "name": "Jacob Westaway"
+  },
+  "plugins": [
+    {
+      "name": "bio-skills",
+      "description": "pipeline-triage (failed-run debugger) + methods-writer (methods/reproducibility writer). Propose-don't-execute.",
+      "author": {
+        "name": "Jacob Westaway"
+      },
+      "category": "data",
+      "source": "./"
+    }
+  ]
+}

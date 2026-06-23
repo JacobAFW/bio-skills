@@ -72,7 +72,7 @@ never a push to `main`. Verified against `anthropics/claude-code-action@v1`.
 ## Install (Claude Code)
 
 ```
-/plugin marketplace add <your-org>/bio-skills
+/plugin marketplace add <your-github-username>/bio-skills
 /plugin install bio-skills@bio-skills
 ```
 
