@@ -30,10 +30,30 @@ Given the evidence from a failed run, it:
 
 It proposes. It never resubmits, deletes, moves, or overwrites anything.
 
+## Scheduler-aware
+
+First, detect the scheduler from the evidence and use its idioms — don't assume
+SLURM. The diagnostic logic below is identical across schedulers; only the signals
+and the drafted commands change.
+
+| | SLURM | PBS / Torque | SGE | LSF |
+| --- | --- | --- | --- | --- |
+| submit / resubmit | `sbatch` | `qsub` | `qsub` | `bsub` |
+| inspect a job | `sacct`, `seff` | `qstat -f`, `tracejob` | `qacct` | `bjobs -l`, `bhist` |
+| request memory | `--mem` | `-l mem=` / `-l pmem=` | `-l h_vmem=` | `-M` / `-R rusage[mem=]` |
+| request walltime | `--time` | `-l walltime=` | `-l h_rt=` | `-W` |
+| log file | `slurm-<id>.out` | `<job>.o<id>` / `.e<id>` | `<job>.o<id>` | `<job>.out` |
+| OOM signal | `oom_kill`, exit 137 | `PBS: job killed: mem ... exceeded`, exit 137 | `h_vmem` exceeded | `TERM_MEMLIMIT` |
+| walltime signal | `TIMEOUT`, exit 140 | `walltime ... exceeded` | `h_rt` exceeded | `TERM_RUNLIMIT` |
+
+If the scheduler can't be told from the evidence, say so and ask, rather than
+defaulting to SLURM commands the user can't run.
+
 ## Inputs (gather what's available, don't demand all of it)
 
-- The error itself: stderr, scheduler log (`slurm-<jobid>.out`, `.err`), exit code,
-  `sacct`/`seff` output if present.
+- The error itself: stderr, scheduler log (SLURM `slurm-<id>.out`/`.err`, PBS
+  `<job>.o<id>`/`.e<id>`, etc.), exit code, and any post-mortem (`seff`/`sacct`,
+  `qstat -f`/`tracejob`, `bjobs -l`) if present.
 - The command that was run, and the submission script (resources requested).
 - File context for the inputs/outputs involved: do they exist, are they non-empty,
   is the expected index present (`.bai`, `.fai`, `.tbi`, `.csi`), are reference and
@@ -46,9 +66,10 @@ If a critical piece is missing, name the one thing to paste — don't guess past
 
 Stop at the first rung that explains the evidence.
 
-1. **Resource kill.** `oom-kill`, `Killed`, exit 137, `seff` showing memory at/over
-   request, walltime `TIMEOUT`/exit 140. → Right-size `--mem`/`--time`, suggest array
-   chunking or a streaming flag if the input is large.
+1. **Resource kill.** OOM (`oom_kill`/`Killed`/exit 137, or PBS "mem ... exceeded",
+   LSF `TERM_MEMLIMIT`) or walltime overrun (`TIMEOUT`/exit 140, PBS "walltime ...
+   exceeded"). → Right-size the memory/walltime request in the detected scheduler's
+   syntax, and suggest array chunking or a streaming flag if the input is large.
 2. **Missing / stale index or input.** "could not load index", "fail to open",
    absent `.fai/.bai/.tbi`, zero-byte input, partial download. → Rebuild the index or
    re-stage the input; flag if the index is older than the file it indexes.
@@ -80,8 +101,8 @@ IF WRONG:   <the single next probe, if the top call doesn't hold>
 
 ## Guardrails
 
-- **Propose, never execute.** No `sbatch`, no `rm`, no overwrite. Hand over the
-  command; the human runs it. (Matches Jacob's standing confirmation gates.)
+- **Propose, never execute.** No `sbatch`/`qsub`/`bsub`, no `rm`, no overwrite. Hand
+  over the command; the human runs it. (Matches Jacob's standing confirmation gates.)
 - **One cause, not a checklist.** Commit to the most-likely root cause. A wall of
   "could be any of these" is the failure mode this skill exists to avoid.
 - **Don't invent specifics.** If the version, path, or contig name isn't in the
