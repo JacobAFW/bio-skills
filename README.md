@@ -1,26 +1,40 @@
 # bio-skills
 
-*Agent skills for the bioinformatics chores that have no tool and need judgement.*
+*Agent skills for the bioinformatics research-engineering chores that have no tool and need judgement.*
 
-Two installable skills for Claude Code (and any skill-capable agent). They don't
-reimplement FastQC, MultiQC, samtools, or bcftools. They do the part those tools
-leave to a human: reading a wall of output and **deciding what to do next**.
-
-The design rule is the whole point:
+A small, curated collection of skills for Claude Code (and any skill-capable agent).
+They share one philosophy: do the part a human is left holding — the judgement —
+and never the part a mature tool already does well.
 
 > **Wrap, don't rebuild.** If a mature tool already computes it, the skill calls
 > that tool or reads its output. The value is the judgement layer on top —
 > cross-checks, fitness-for-purpose, a committed decision, and the drafted next action.
 
-A skill that recomputes what FastQC already gives you is noise. A skill that reads
-the report and tells you *which samples to drop and why* is the job.
+> **Propose, never execute.** Every skill hands you the command and stops. None of
+> them resubmit jobs, commit, push, delete, or rewrite history on their own.
 
-## The two skills
+## Pipeline skills
 
 | Skill | The chore it kills |
 | --- | --- |
-| [`pipeline-triage`](skills/pipeline-triage/SKILL.md) | A run died. Reads the logs, stderr and exit code, commits to the root cause, and drafts the fix — OOM, contig mismatch, truncated input, missing index, version clash. |
+| [`pipeline-triage`](skills/pipeline-triage/SKILL.md) | A run died. Reads the logs, stderr and exit code, commits to the root cause, and drafts the fix — OOM, contig mismatch, truncated input, missing index, version clash. Scheduler-aware (SLURM/PBS/SGE/LSF). |
 | [`methods-writer`](skills/methods-writer/SKILL.md) | The analysis is done and now you have to write it up. Turns configs, command history and tool versions into a Methods paragraph, a version table, and a reproducibility checklist. |
+
+A skill that recomputes what FastQC already gives you is noise. A skill that reads
+the report and tells you *which samples to drop and why* is the job.
+
+## Repo-hygiene skills
+
+Keep research repos publishable: code only, no data, no secrets, no identifying
+information. Both read one shared, genomics-aware
+[`reference/sensitive-checklist.md`](reference/sensitive-checklist.md) and follow a
+**default-deny** rule — anything that might be data or sensitive is excluded until
+you confirm otherwise.
+
+| Skill | When |
+| --- | --- |
+| [`repo-scaffold`](skills/repo-scaffold/SKILL.md) | Starting a repo. Classifies every file as code-to-include vs data/secret/sensitive-to-exclude (with reasons), generates a tuned `.gitignore` and README, pastes the git commands. |
+| [`commit-guard`](skills/commit-guard/SKILL.md) | Before every push. Scans staged and tracked files for data, secrets, and PII, reports each with file/line and a remediation command. |
 
 ### `pipeline-triage`, concretely
 
@@ -84,6 +98,12 @@ Or copy a skill folder into `~/.claude/skills/`.
 skills/
   pipeline-triage/SKILL.md     # the debugger skill
   methods-writer/SKILL.md      # the write-up skill
+  repo-scaffold/SKILL.md       # scripts-only new repo
+  commit-guard/SKILL.md        # pre-push data/secret/PII check
+reference/
+  sensitive-checklist.md       # shared, genomics-aware rule set
+  gitignore.default            # strong default for R / Python / bioinformatics
+  README.template.md           # 'what's in / deliberately out' template
 benchmarks/
   README.md                    # eval design
   score_cases.py               # scoring harness (runs; agent hooks are TODO)

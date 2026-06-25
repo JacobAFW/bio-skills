@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "bio-skills",
-      "description": "pipeline-triage (failed-run debugger) + methods-writer (methods/reproducibility writer). Propose-don't-execute.",
+      "description": "Four skills: pipeline-triage + methods-writer (pipeline) and repo-scaffold + commit-guard (repo hygiene). Propose-don't-execute, default-deny.",
       "author": {
         "name": "Jacob Westaway"
       },
