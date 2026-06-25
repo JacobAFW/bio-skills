@@ -1,0 +1,17 @@
+{
+  "description": "clean-repo: before any git commit/push the agent runs, scan staged/tracked files for data, secrets, and metadata, and block (exit 2) if found.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/git-guard.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Portable defense-in-depth pre-push hook (catches ANY push, not just claude-code's).
+#
+# Install in a repo that has scripts/scan.sh available:
+#   git config core.hooksPath git-hooks       # from a checkout of this repo
+# or copy scripts/scan.sh + this file into your repo and point core.hooksPath at it.
+set -uo pipefail
+
+here="$(cd "$(dirname "$0")" && pwd)"
+scan="$here/../scripts/scan.sh"
+[ -x "$scan" ] || scan="$(git rev-parse --show-toplevel)/scripts/scan.sh"
+
+if [ ! -x "$scan" ]; then
+  echo "pre-push: scripts/scan.sh not found; skipping clean-repo scan." >&2
+  exit 0
+fi
+
+exec "$scan" tracked

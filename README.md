@@ -36,6 +36,27 @@ you confirm otherwise.
 | [`repo-scaffold`](skills/repo-scaffold/SKILL.md) | Starting a repo. Classifies every file as code-to-include vs data/secret/sensitive-to-exclude (with reasons), generates a tuned `.gitignore` and README, pastes the git commands. |
 | [`commit-guard`](skills/commit-guard/SKILL.md) | Before every push. Scans staged and tracked files for data, secrets, and PII, reports each with file/line and a remediation command. |
 
+### Automatic enforcement (for autonomous agents)
+
+The skills above are invoked at the agent's discretion — fine when a human is
+driving, not enough in an unattended loop. For that, a **hook** makes the check
+unskippable:
+
+- **`hooks/git-guard.sh`** (a Claude Code `PreToolUse` hook, auto-loaded from
+  `hooks/hooks.json`) fires before any Bash command the agent runs. On a `git
+  commit`/`git push` it runs `scripts/scan.sh` first and **blocks with exit 2** if
+  anything trips, handing the findings back to the agent instead of letting the push
+  through. Still human-in-the-loop in spirit: it halts and surfaces, it doesn't
+  auto-resolve.
+- **`git-hooks/pre-push`** is a portable plain-git version that guards *any* push,
+  not just the agent's. Enable with `git config core.hooksPath git-hooks`.
+
+The hook does only the deterministic, pattern-detectable subset — data-file
+extensions, known secret tokens, sample-sheet names, and it *wraps* `gitleaks` if
+installed. The subtle PII/sensitivity judgement stays in `commit-guard`. So:
+**hook = automatic guarantee for the catchable stuff; skill = judgement when you're
+driving.** Needs `jq`; `gitleaks` optional.
+
 ### `pipeline-triage`, concretely
 
 A GATK array task dies overnight. You get this:
@@ -104,6 +125,13 @@ reference/
   sensitive-checklist.md       # shared, genomics-aware rule set
   gitignore.default            # strong default for R / Python / bioinformatics
   README.template.md           # 'what's in / deliberately out' template
+scripts/
+  scan.sh                      # deterministic data/secret/metadata scanner
+hooks/
+  hooks.json                   # PreToolUse hook wiring (auto-loaded)
+  git-guard.sh                 # blocks agent git commit/push on findings
+git-hooks/
+  pre-push                     # portable plain-git enforcement
 benchmarks/
   README.md                    # eval design
   score_cases.py               # scoring harness (runs; agent hooks are TODO)
