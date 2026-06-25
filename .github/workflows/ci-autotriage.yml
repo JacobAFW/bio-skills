@@ -1,14 +1,12 @@
-# Minimal CI-fix loop: run tests, and if they fail, let pipeline-triage diagnose
-# the failure and open a PR with the fix. It NEVER pushes to main and never
-# resubmits/deletes anything — propose-don't-execute, same as the skill itself.
+# CI-fix loop: run the repo's own checks, and if they fail, let pipeline-triage
+# diagnose the failure and open a PR/issue with the fix. It NEVER pushes to main
+# and never resubmits/deletes anything — propose-don't-execute, like the skill.
 #
-# Verified against anthropics/claude-code-action@v1 (June 2026). v1 uses `prompt`
-# for automation and `claude_args` for CLI flags; `mode` is auto-detected.
+# Verified against anthropics/claude-code-action@v1 (June 2026).
 #
-# Prerequisites:
-#   1. Install the Claude GitHub App on the repo (run `/install-github-app` from
-#      Claude Code in your terminal — easiest path).
-#   2. Add ANTHROPIC_API_KEY to the repo's Actions secrets (never hardcode it).
+# To enable the live triage half (optional): install the Claude GitHub App
+# (`/install-github-app` from Claude Code) and add ANTHROPIC_API_KEY to the repo's
+# Actions secrets. Until then, green builds simply never invoke it.
 
 name: CI + auto-triage
 
@@ -16,6 +14,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: write       # create the fix branch
@@ -27,21 +26,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run tests
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install deps
+        run: pip install pyyaml
+      - name: Validate plugin manifests
         run: |
-          # Replace with your real suite, e.g.:
-          #   pytest -q
-          #   Rscript tests/run_tests.R
-          #   nextflow run . -profile test
-          ./run_tests.sh
+          python -m json.tool .claude-plugin/plugin.json > /dev/null
+          python -m json.tool .claude-plugin/marketplace.json > /dev/null
+      - name: Compile + dry-run the benchmark harness
+        run: |
+          python -m py_compile benchmarks/score_cases.py
+          python benchmarks/score_cases.py
+      - name: Check each skill has YAML frontmatter
+        run: |
+          for f in skills/*/SKILL.md; do
+            head -1 "$f" | grep -q '^---$' || { echo "missing frontmatter: $f"; exit 1; }
+          done
+      # Real test suite goes here as the repo grows (pytest / Rscript / nextflow ...).
 
   triage:
     needs: test
-    if: ${{ failure() }}          # only when the test job failed
+    if: ${{ failure() }}                       # only when the test job failed
     runs-on: ubuntu-latest
+    env:
+      HAS_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
-      - uses: anthropics/claude-code-action@v1
+      - name: No API key — skip auto-triage
+        if: ${{ env.HAS_KEY != 'true' }}
+        run: echo "ANTHROPIC_API_KEY not set; skipping auto-triage. See README to enable."
+      - name: Triage the failure
+        if: ${{ env.HAS_KEY == 'true' }}
+        uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           additional_permissions: |
@@ -59,8 +77,7 @@ jobs:
                create a new branch and open a pull request with the fix, putting the
                ROOT CAUSE / EVIDENCE / FIX summary in the PR body.
             4. If the cause is data, environment, or resources (not a repo fix), do
-               NOT change code — open an issue with the diagnosis and the suggested
-               command instead.
+               NOT change code — open an issue with the diagnosis and suggested command.
 
             Hard rules: never push to main, never force-push, never delete files,
             never resubmit jobs. Propose; a human merges.
@@ -68,19 +85,6 @@ jobs:
             --max-turns 15
 
 # --- Productionised alternative -------------------------------------------------
-# Once bio-skills is published as a plugin marketplace, swap the in-repo skill
-# reference for a clean install instead of "read the SKILL.md file":
-#
-#   plugin_marketplaces: "https://github.com/<your-org>/bio-skills.git"
+# Once you want the published-plugin install instead of "read the SKILL.md file":
+#   plugin_marketplaces: "https://github.com/<your-username>/bio-skills.git"
 #   plugins: "bio-skills@bio-skills"
-#
-# (requires a .claude-plugin/marketplace.json in the repo — the one wiring step
-# still to add; flagged rather than guessed.)
-#
-# --- workflow_run alternative ---------------------------------------------------
-# For full separation, trigger triage from a SEPARATE existing CI workflow via
-#   on:
-#     workflow_run:
-#       workflows: ["Your CI"]
-#       types: [completed]
-#   ...with  if: ${{ github.event.workflow_run.conclusion == 'failure' }}
