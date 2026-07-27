@@ -1,5 +1,5 @@
 {
-  "description": "clean-repo: before any git commit/push the agent runs, scan staged/tracked files for data, secrets, and metadata, and block (exit 2) if found.",
+  "description": "bio-skills hooks: git-guard blocks data/secrets before commit/push (PreToolUse); genericity-guard flags untagged hardcoding after edits to core pipeline code (PostToolUse).",
   "hooks": {
     "PreToolUse": [
       {
@@ -9,6 +9,18 @@
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/git-guard.sh",
             "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/genericity-guard.sh",
+            "timeout": 30
           }
         ]
       }

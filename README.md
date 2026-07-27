@@ -57,6 +57,24 @@ installed. The subtle PII/sensitivity judgement stays in `commit-guard`. So:
 **hook = automatic guarantee for the catchable stuff; skill = judgement when you're
 driving.** Needs `jq`; `gitleaks` optional.
 
+## Genericity skills
+
+Keep pipelines reusable by design, enforced against a portable contract:
+[`reference/architecture.md`](reference/architecture.md) is the rule set for how
+pipelines are built (config-driven, no hardcoded paths/organism/samples in core
+code, a documented escape hatch), and [`reference/CLAUDE.template.md`](reference/CLAUDE.template.md)
+is the thin per-project file that declares a project's genericity level and points
+at the contract.
+
+| Skill / hook | When |
+| --- | --- |
+| [`genericity-lint`](skills/genericity-lint/SKILL.md) | On demand / at a phase boundary. Reviews core code against the contract and the declared level: untagged hardcoding, threshold literals that belong in config, organism assumptions, silent defaults, one-rule-one-step. |
+| `genericity-guard` hook | Automatic. A `PostToolUse` hook flags untagged hardcoding in core pipeline code right after an edit, so drift is caught in-loop rather than phases later. |
+
+The escape hatch: intentional hardcoding is fine if tagged `# HARDCODE(reason; date):`
+and logged in `DESIGN.md` — tagged lines are never flagged. Same split as the hygiene
+side — the hook does the pattern-precise subset, `genericity-lint` does the judgement.
+
 ### `pipeline-triage`, concretely
 
 A GATK array task dies overnight. You get this:
@@ -121,15 +139,20 @@ skills/
   methods-writer/SKILL.md      # the write-up skill
   repo-scaffold/SKILL.md       # scripts-only new repo
   commit-guard/SKILL.md        # pre-push data/secret/PII check
+  genericity-lint/SKILL.md     # hardcoding + reusability review
 reference/
   sensitive-checklist.md       # shared, genomics-aware rule set
   gitignore.default            # strong default for R / Python / bioinformatics
   README.template.md           # 'what's in / deliberately out' template
+  architecture.md              # portable pipeline design contract
+  CLAUDE.template.md           # thin per-project contract (declares level)
 scripts/
   scan.sh                      # deterministic data/secret/metadata scanner
+  genericity-scan.sh           # deterministic hardcoding scanner (core code)
 hooks/
-  hooks.json                   # PreToolUse hook wiring (auto-loaded)
+  hooks.json                   # PreToolUse + PostToolUse wiring (auto-loaded)
   git-guard.sh                 # blocks agent git commit/push on findings
+  genericity-guard.sh          # flags hardcoding after edits to core code
 git-hooks/
   pre-push                     # portable plain-git enforcement
 benchmarks/
