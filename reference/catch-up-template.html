@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!--
+  catch-up template — Jacob's Cobalt2 family, cleaner/lighter than the daily dashboards.
+  The catch-up skill fills the {{PLACEHOLDERS}} and keeps this CSS unchanged so the
+  aesthetic stays consistent. Self-contained; render as an inline artifact, don't
+  save it into the project. The VISUAL block is optional — keep it ONLY when the
+  project has something genuinely worth showing; otherwise delete that whole card.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{PROJECT}} — catch-up</title>
+<style>
+  :root{
+    --indigo:#ffc600; --magenta:#ff628c; --orange:#ff9d00; --teal:#9effff;
+    --cream:#dcebff;  --ink:#e8f1ff;     --muted:#8aa6bd;   --faint:#5f7f98;
+    --border:#22415a; --hair:#1a3346;    --bg-deep:#102232; --bg-mid:#0b1826;
+    --card:#163045;   --card-2:#12283a;  --on-bright:#0a1a28;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --r-lg:14px; --r-md:10px; --r-sm:6px;
+    --shadow:0 2px 10px rgba(0,0,0,.28);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:var(--sans); color:var(--ink); line-height:1.5;
+    background:linear-gradient(180deg,var(--bg-deep) 0%,var(--bg-mid) 100%);
+    padding:28px 20px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:16px}
+
+  header{
+    background:linear-gradient(135deg,#13202b 0%,#1a3a56 100%);
+    border:1px solid var(--border); border-radius:var(--r-lg);
+    padding:22px 26px; box-shadow:var(--shadow);
+  }
+  .kicker{font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--indigo)}
+  header h1{margin:8px 0 6px; font-size:clamp(22px,3vw,28px); font-weight:750; letter-spacing:-.02em; color:#fff; line-height:1.15}
+  .goal{color:var(--cream); font-size:15px; margin:0}
+  .stamp{margin-top:10px; font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; color:var(--faint)}
+
+  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--r-lg); padding:18px 20px; box-shadow:var(--shadow)}
+  .card h2{
+    margin:0 0 12px; font-family:var(--mono); font-size:11px; font-weight:650;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
+    display:flex; align-items:center; gap:9px;
+  }
+  .card h2 .dot{width:8px; height:8px; border-radius:50%; flex:none}
+  .dot.teal{background:var(--teal)} .dot.yellow{background:var(--indigo)} .dot.orange{background:var(--orange)}
+
+  ul.phases{list-style:none; margin:0; padding:0}
+  ul.phases li{
+    padding:6px 0 6px 20px; position:relative; color:var(--cream); font-size:14px;
+    border-bottom:1px solid var(--hair);
+  }
+  ul.phases li:last-child{border-bottom:none}
+  ul.phases li::before{content:"✓"; position:absolute; left:0; color:var(--teal); font-size:12px; top:7px}
+  ul.phases li .when{font-family:var(--mono); font-size:11px; color:var(--faint); margin-left:6px}
+
+  .recent .metrics{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin:0 0 14px}
+  .recent .metric{background:var(--card-2); border:1px solid var(--hair); border-radius:var(--r-md); padding:10px 12px}
+  .recent .metric .num{font-size:22px; font-weight:750; color:var(--indigo); line-height:1.1}
+  .recent .metric .lbl{font-size:11px; color:var(--muted); margin-top:4px; line-height:1.3}
+  .recent ul.detail{margin:0; padding-left:18px}
+  .recent ul.detail li{font-size:14px; color:var(--cream); margin-bottom:8px; line-height:1.5}
+  .recent ul.detail li:last-child{margin-bottom:0}
+  .recent ul.detail li .k{color:var(--teal); font-weight:600}
+  .recent strong{color:#fff}
+
+  .resume{border-left:3px solid var(--indigo); background:rgba(255,198,0,.05)}
+  .resume .next{font-size:15px; color:#fff; margin:0 0 10px; font-weight:600}
+  .resume ul{margin:6px 0 0; padding-left:18px}
+  .resume li{font-size:13.5px; color:var(--cream); margin-bottom:4px}
+  .resume li .age{font-family:var(--mono); font-size:11px; color:var(--orange)}
+
+  /* OPTIONAL visual — keep only when there is something worth showing */
+  .visual figure{margin:0}
+  .visual .cap{font-family:var(--mono); font-size:10.5px; color:var(--faint); margin-top:8px; text-align:center}
+
+  code{font-family:var(--mono); font-size:.88em; background:rgba(255,255,255,.06); padding:1px 5px; border-radius:4px; color:var(--cream)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header>
+      <div class="kicker">Catch-up · {{HEALTH_OR_STATUS}}</div>
+      <h1>{{PROJECT}}</h1>
+      <p class="goal">{{GOAL}}</p>
+      <div class="stamp">{{LAST_ACTIVITY}} · {{N_PHASES}} phases</div>
+    </header>
+
+    <section class="card">
+      <h2><span class="dot teal"></span>Phases so far</h2>
+      <ul class="phases">
+        <li>{{PHASE_1}} <span class="when">{{PHASE_1_WHEN}}</span></li>
+        <li>{{PHASE_2}} <span class="when">{{PHASE_2_WHEN}}</span></li>
+        <!-- one <li> per phase, one line each -->
+      </ul>
+    </section>
+
+    <section class="card recent">
+      <h2><span class="dot orange"></span>Where you left off</h2>
+      <!-- metrics row: 2-3 headline numbers from the recent work. Delete if none. -->
+      <div class="metrics">
+        <div class="metric"><div class="num">{{M1}}</div><div class="lbl">{{M1_LABEL}}</div></div>
+        <div class="metric"><div class="num">{{M2}}</div><div class="lbl">{{M2_LABEL}}</div></div>
+        <div class="metric"><div class="num">{{M3}}</div><div class="lbl">{{M3_LABEL}}</div></div>
+      </div>
+      <!-- the substance: what was produced, the key finding, the current lean, caveats.
+           One <li> each; label the type with <span class="k"> when it helps. -->
+      <ul class="detail">
+        <li><span class="k">Produced —</span> {{WHAT_WAS_PRODUCED}}</li>
+        <li><span class="k">Finding —</span> {{KEY_FINDING}}</li>
+        <li><span class="k">Leaning —</span> {{CURRENT_DECISION}}</li>
+        <li><span class="k">Watch —</span> {{CAVEATS}}</li>
+      </ul>
+    </section>
+
+    <section class="card resume">
+      <h2><span class="dot yellow"></span>Resume here</h2>
+      <p class="next">{{NEXT_STEP}}</p>
+      <ul>
+        <li>{{BLOCKER_1}} <span class="age">{{BLOCKER_1_AGE}}</span></li>
+        <!-- omit this whole list if there are no blockers -->
+      </ul>
+    </section>
+
+    <!-- OPTIONAL: delete this entire card unless a visual genuinely helps
+    <section class="card visual">
+      <h2><span class="dot yellow"></span>{{VISUAL_TITLE}}</h2>
+      <figure>{{VISUAL_SVG_OR_IMG}}<figcaption class="cap">{{VISUAL_CAPTION}}</figcaption></figure>
+    </section>
+    -->
+
+  </div>
+</body>
+</html>

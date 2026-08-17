@@ -76,6 +76,12 @@ The escape hatch: intentional hardcoding is fine if tagged `# HARDCODE(reason; d
 and logged in `DESIGN.md` — tagged lines are never flagged. Same split as the hygiene
 side — the hook does the pattern-precise subset, `genericity-lint` does the judgement.
 
+## Orientation
+
+| Skill | When |
+| --- | --- |
+| [`catch-up`](skills/catch-up/SKILL.md) | Coming back to a project after days or weeks away. Reads `STATUS.md`/`MEMORY.md`/README/git/recent files and gives a brief recap — goal, phases as one-liners, where you left off, and the next step + blockers — plus a clean Cobalt2 HTML artifact (regenerated each time, not saved into the project). |
+
 ### `pipeline-triage`, concretely
 
 A GATK array task dies overnight. You get this:
@@ -142,12 +148,14 @@ skills/
   commit-guard/SKILL.md        # pre-push data/secret/PII check
   project-setup/SKILL.md       # stand up a new project skeleton
   genericity-lint/SKILL.md     # hardcoding + reusability review
+  catch-up/SKILL.md            # recap a stale project as a Cobalt2 artifact
 reference/
   sensitive-checklist.md       # shared, genomics-aware rule set
   gitignore.default            # strong default for R / Python / bioinformatics
   README.template.md           # 'what's in / deliberately out' template
   architecture.md              # portable pipeline design contract
   CLAUDE.template.md           # thin per-project contract (declares level)
+  catch-up-template.html       # Cobalt2 recap artifact (fill, keep CSS)
 scripts/
   scan.sh                      # deterministic data/secret/metadata scanner
   genericity-scan.sh           # deterministic hardcoding scanner (core code)

@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "bio-skills",
-  "description": "Agent skills for the bioinformatics research-engineering chores that have no tool and need judgement. Pipeline: pipeline-triage (diagnose a failed run) and methods-writer (Methods + reproducibility record). Repo hygiene: repo-scaffold (scripts-only new repo) and commit-guard (pre-push data/secret/PII check). Genericity: project-setup (stand up a new project skeleton + ARCHITECTURE.md contract) and genericity-lint (hardcoding + reusability review). All propose, never execute. Ships git-guard (block secrets/data at commit) and genericity-guard (flag hardcoding after edits) hooks.",
-  "version": "0.4.0",
+  "description": "Agent skills for the bioinformatics research-engineering chores that have no tool and need judgement. Pipeline: pipeline-triage (diagnose a failed run) and methods-writer (Methods + reproducibility record). Repo hygiene: repo-scaffold (scripts-only new repo) and commit-guard (pre-push data/secret/PII check). Genericity: project-setup (stand up a new project skeleton + ARCHITECTURE.md contract) and genericity-lint (hardcoding + reusability review). Orientation: catch-up (brief Cobalt2 recap artifact for a stale project). All propose, never execute. Ships git-guard (block secrets/data at commit) and genericity-guard (flag hardcoding after edits) hooks.",
+  "version": "0.5.0",
   "author": {
     "name": "Jacob Westaway"
   },
