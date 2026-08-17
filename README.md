@@ -68,6 +68,7 @@ at the contract.
 
 | Skill / hook | When |
 | --- | --- |
+| [`project-setup`](skills/project-setup/SKILL.md) | Starting a project. Scaffolds the canonical structure, drops `ARCHITECTURE.md` + a project `CLAUDE.md` with the level declared, a default-deny `.gitignore`, and config stubs. Non-destructive; runs no git. |
 | [`genericity-lint`](skills/genericity-lint/SKILL.md) | On demand / at a phase boundary. Reviews core code against the contract and the declared level: untagged hardcoding, threshold literals that belong in config, organism assumptions, silent defaults, one-rule-one-step. |
 | `genericity-guard` hook | Automatic. A `PostToolUse` hook flags untagged hardcoding in core pipeline code right after an edit, so drift is caught in-loop rather than phases later. |
 
@@ -139,6 +140,7 @@ skills/
   methods-writer/SKILL.md      # the write-up skill
   repo-scaffold/SKILL.md       # scripts-only new repo
   commit-guard/SKILL.md        # pre-push data/secret/PII check
+  project-setup/SKILL.md       # stand up a new project skeleton
   genericity-lint/SKILL.md     # hardcoding + reusability review
 reference/
   sensitive-checklist.md       # shared, genomics-aware rule set
@@ -149,6 +151,7 @@ reference/
 scripts/
   scan.sh                      # deterministic data/secret/metadata scanner
   genericity-scan.sh           # deterministic hardcoding scanner (core code)
+  new-project.sh               # non-destructive project skeleton scaffolder
 hooks/
   hooks.json                   # PreToolUse + PostToolUse wiring (auto-loaded)
   git-guard.sh                 # blocks agent git commit/push on findings

@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "bio-skills",
-      "description": "Five skills across pipeline (triage, methods-writer), repo hygiene (repo-scaffold, commit-guard), and genericity (genericity-lint) + git-guard/genericity-guard hooks. Propose-don't-execute, default-deny.",
+      "description": "Six skills across pipeline (triage, methods-writer), repo hygiene (repo-scaffold, commit-guard), and genericity/architecture (project-setup, genericity-lint) + git-guard/genericity-guard hooks. Propose-don't-execute, default-deny.",
       "author": {
         "name": "Jacob Westaway"
       },
